@@ -1,7 +1,127 @@
-/* Seu tema para o painel do Dokploy.
-   Edite este arquivo e recarregue a página (sem reiniciar nada). */
+/* Tema sutil para a home do Dokploy.
+   Usa as variáveis do próprio painel (--border, --muted-foreground...), então
+   funciona nos modos claro e escuro. Escopo: só a home (data-dkt="home"). */
 
-:root {
-  /* Exemplo: troque a cor de destaque. Descomente para testar. */
-  /* --primary: 262 83% 58%; */
+[data-dkt="home"] {
+  --dkt-ok: 152 60% 42%;
+  --dkt-warn: 38 92% 50%;
+  --dkt-err: 0 72% 55%;
+  --dkt-idle: 220 9% 52%;
+  position: relative;
+}
+
+/* Brilho suave no topo da home */
+[data-dkt="home"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 220px;
+  background: radial-gradient(70% 100% at 50% 0%, hsl(var(--primary) / 0.07), transparent 70%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+[data-dkt="home"] > * { position: relative; }
+
+/* Cards de números e blocos nativos */
+[data-dkt="home"] .rounded-xl.border {
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+[data-dkt="home"] .grid > .rounded-xl.border:hover {
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: 0 6px 24px -12px hsl(var(--primary) / 0.35);
+  transform: translateY(-1px);
+}
+[data-dkt="home"] .grid > .rounded-xl.border .text-3xl {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+[data-dkt="home"] ul.divide-y > li a { transition: background-color .15s ease; }
+
+/* Ordem: alerta, (nativos), painéis do tema, deploys */
+[data-dkt="home"] > .dkt-alert { order: -1; }
+[data-dkt="home"] > .dkt-panels { order: 1; }
+[data-dkt="home"] > [data-dkt-after] { order: 2; }
+
+/* ---------- Painéis do tema ---------- */
+.dkt-panels { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+@media (min-width: 1024px) { .dkt-panels { grid-template-columns: 320px 1fr; align-items: start; } }
+
+.dkt-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background: hsl(var(--background));
+}
+.dkt-card-h {
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  padding: .85rem 1.1rem; border-bottom: 1px solid hsl(var(--border));
+}
+.dkt-card-h h2 { font-size: .875rem; font-weight: 600; margin: 0; }
+.dkt-muted { color: hsl(var(--muted-foreground)); font-size: .75rem; }
+
+/* Alerta de serviços com erro */
+.dkt-alert {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  padding: .7rem 1rem; border-radius: .75rem; font-size: .85rem;
+  border: 1px solid hsl(var(--dkt-err) / .35);
+  background: hsl(var(--dkt-err) / .08);
+}
+.dkt-alert strong { font-weight: 600; }
+.dkt-alert a {
+  padding: .1rem .55rem; border-radius: 999px; font-size: .75rem;
+  border: 1px solid hsl(var(--dkt-err) / .4); text-decoration: none; color: inherit;
+}
+.dkt-alert a:hover { background: hsl(var(--dkt-err) / .15); }
+
+/* Servidor */
+.dkt-server { padding: 1rem 1.1rem 1.1rem; display: grid; gap: .95rem; }
+.dkt-meter-top { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: .35rem; }
+.dkt-meter-top span:last-child { color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums; }
+.dkt-bar { height: 6px; border-radius: 999px; background: hsl(var(--muted)); overflow: hidden; }
+.dkt-bar > i {
+  display: block; height: 100%; border-radius: inherit; width: 0;
+  background: hsl(var(--dkt-ok)); transition: width .6s ease, background-color .3s ease;
+}
+.dkt-bar > i.warn { background: hsl(var(--dkt-warn)); }
+.dkt-bar > i.err { background: hsl(var(--dkt-err)); }
+.dkt-foot { display: flex; justify-content: space-between; padding-top: .1rem; }
+
+/* Apps */
+.dkt-search {
+  width: 100%; max-width: 220px; height: 2rem; padding: 0 .7rem; font-size: .8rem;
+  border-radius: .5rem; border: 1px solid hsl(var(--border));
+  background: hsl(var(--background)); color: inherit; outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.dkt-search:focus { border-color: hsl(var(--primary) / .6); box-shadow: 0 0 0 3px hsl(var(--primary) / .12); }
+
+.dkt-grid { display: grid; gap: .6rem; padding: .85rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.dkt-app {
+  display: flex; flex-direction: column; gap: .55rem; padding: .75rem .85rem;
+  border: 1px solid hsl(var(--border)); border-radius: .6rem; text-decoration: none; color: inherit;
+  transition: border-color .15s ease, background-color .15s ease, transform .15s ease;
+}
+.dkt-app:hover { border-color: hsl(var(--primary) / .4); background: hsl(var(--muted) / .35); transform: translateY(-1px); }
+.dkt-app-top { display: flex; align-items: center; gap: .55rem; min-width: 0; }
+.dkt-app-name { font-size: .85rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dkt-app-sub { font-size: .72rem; color: hsl(var(--muted-foreground)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dkt-app-bot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.dkt-tag { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: hsl(var(--muted-foreground)); }
+.dkt-open {
+  font-size: .72rem; padding: .15rem .55rem; border-radius: 999px; text-decoration: none; color: inherit;
+  border: 1px solid hsl(var(--border)); transition: border-color .15s ease, background-color .15s ease;
+}
+.dkt-open:hover { border-color: hsl(var(--primary) / .5); background: hsl(var(--primary) / .08); }
+
+.dkt-dot { width: .5rem; height: .5rem; border-radius: 999px; flex: none; background: hsl(var(--dkt-idle)); }
+.dkt-dot.done { background: hsl(var(--dkt-ok)); box-shadow: 0 0 0 3px hsl(var(--dkt-ok) / .15); }
+.dkt-dot.error { background: hsl(var(--dkt-err)); box-shadow: 0 0 0 3px hsl(var(--dkt-err) / .18); }
+.dkt-dot.running { background: hsl(var(--dkt-warn)); animation: dkt-pulse 1.4s ease-in-out infinite; }
+@keyframes dkt-pulse { 0%,100% { box-shadow: 0 0 0 0 hsl(var(--dkt-warn) / .5); } 50% { box-shadow: 0 0 0 5px hsl(var(--dkt-warn) / 0); } }
+
+.dkt-empty { padding: 2rem 1rem; text-align: center; }
+.dkt-skel { height: 64px; border-radius: .6rem; background: hsl(var(--muted) / .5); animation: dkt-sk 1.2s ease-in-out infinite; }
+@keyframes dkt-sk { 50% { opacity: .45; } }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-dkt="home"] *, .dkt-panels * { animation: none !important; transition: none !important; }
 }
