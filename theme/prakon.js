@@ -20,8 +20,8 @@
 
   /* ---------------- textos ---------------- */
   const LOGIN = new Map([
-    ["Sign in", "Entrar"],
-    ["Enter your email and password to sign in", "Digite seu e-mail e senha para entrar"],
+    ["Sign in", "Entrar no Prakon"],
+    ["Enter your email and password to sign in", "Use seu e-mail e senha para continuar"],
     ["Email", "E-mail"],
     ["Password", "Senha"],
     ["Login", "Entrar"],
@@ -170,6 +170,13 @@
       if (hero) hero.classList.add("prk-hero");
       const form = root.querySelector("#login-form");
       if (form && form.parentElement) form.parentElement.classList.add("prk-login-form");
+      const pk = root.querySelector('#login-form ~ button[data-variant="outline"]');
+      if (pk && !pk.previousElementSibling?.classList.contains("prk-or")) {
+        const or = document.createElement("div");
+        or.className = "prk-or";
+        or.textContent = "ou";
+        pk.before(or);
+      }
     }
   }
 
@@ -283,6 +290,32 @@
     };
   }
   window.addEventListener("popstate", () => requestAnimationFrame(routeChanged));
+
+  /* ---------------- login: grade que acende perto do cursor ---------------- */
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let glow = null;
+  function initGlow() {
+    const box = document.querySelector(".container:has(#login-form)");
+    if (!box || box.__prkGlow || still) return;
+    box.__prkGlow = true;
+    let tx = innerWidth / 2, ty = innerHeight * 0.4, x = tx, y = ty, run = false;
+    const paint = () => {
+      x += (tx - x) * 0.14;
+      y += (ty - y) * 0.14;
+      box.style.setProperty("--mx", x.toFixed(1) + "px");
+      box.style.setProperty("--my", y.toFixed(1) + "px");
+      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.5) requestAnimationFrame(paint);
+      else run = false;
+    };
+    const go = () => { if (!run) { run = true; requestAnimationFrame(paint); } };
+    window.addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; box.classList.add("prk-glow-on"); go(); }, { passive: true });
+    document.addEventListener("pointerleave", () => box.classList.remove("prk-glow-on"));
+    box.style.setProperty("--mx", x + "px");
+    box.style.setProperty("--my", y + "px");
+    glow = box;
+  }
+  setInterval(initGlow, 600);
+  initGlow();
 
   queue(document.body);
 })();
