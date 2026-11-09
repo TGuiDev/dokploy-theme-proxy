@@ -1,0 +1,13 @@
+{
+  "name": "dokploy-theme-proxy",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i src/input.css -o theme/custom.css --minify",
+    "watch": "tailwindcss -i src/input.css -o theme/custom.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.5",
+    "geist": "^1.9.2",
+    "tailwindcss": "^4.3.5"
+  }
+}
