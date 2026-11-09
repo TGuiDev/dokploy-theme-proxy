@@ -263,57 +263,43 @@
 
   /* ------------------------------ UI ---------------------------------- */
 
-  /** Medidor de LEDs: N segmentos que acendem conforme o uso. */
+  /** Medidor de uso: barra fina que fica âmbar/vermelha só quando aperta. */
   function buildMeter(label) {
     const wrap = el("div", "dk:flex dk:flex-col dk:gap-2");
     const top = el("div", "dk:flex dk:items-baseline dk:justify-between dk:gap-3");
-    top.append(
-      el("span", "dk:text-xs dk:font-medium dk:uppercase dk:tracking-wider dk:text-(--muted-foreground)", label),
-      (() => {
-        const v = el("span", "dk:font-mono dk:text-sm dk:tabular-nums dk:text-(--foreground)", "—");
-        v.dataset.value = "";
-        return v;
-      })(),
-    );
-    const row = el("div", "dk:flex dk:gap-[3px]");
-    const segs = Array.from({ length: SEGMENTS }, () => el("i", `${SEG_BASE} ${SEG_OFF}`));
-    row.append(...segs);
-    wrap.append(top, row);
-
+    const value = el("span", "dk:font-mono dk:text-[13px] dk:tabular-nums dk:text-(--v-fg)", "—");
+    top.append(el("span", "dk:text-[13px] dk:text-(--v-muted)", label), value);
+    const track = el("div", "dk:h-1.5 dk:overflow-hidden dk:rounded-full dk:bg-(--v-hover)");
+    const fill = el("div", "dk:h-full dk:w-0 dk:rounded-full dk:bg-(--v-fg) dk:transition-[width] dk:duration-700 dk:ease-out dk:motion-reduce:transition-none");
+    track.append(fill);
+    wrap.append(top, track);
     wrap.set = (pct, text) => {
       const p = Math.max(0, Math.min(100, pct));
-      const on = Math.round((p / 100) * SEGMENTS);
-      const level = p >= 90 ? "err" : p >= 75 ? "warn" : "ok";
-      top.querySelector("[data-value]").textContent = text;
-      segs.forEach((s, i) => {
-        s.className = `${SEG_BASE} ${i < on ? SEG_ON[level] : SEG_OFF}`;
-      });
+      value.textContent = text;
+      fill.style.width = p.toFixed(1) + "%";
+      fill.className = `dk:h-full dk:rounded-full dk:transition-[width,background-color] dk:duration-700 dk:ease-out dk:motion-reduce:transition-none ${
+        p >= 90 ? "dk:bg-(--s-err)" : p >= 75 ? "dk:bg-(--s-warn)" : "dk:bg-(--v-fg)"
+      }`;
     };
     return wrap;
   }
 
+  const CARD = "dk:rounded-xl dk:border dk:border-(--v-border) dk:bg-(--v-card)";
+  const skel = (cls) => el("div", `dk:animate-pulse dk:rounded-md dk:bg-(--v-hover) dk:motion-reduce:animate-none ${cls}`);
+
   function buildServerCard() {
-    const card = el(
-      "section",
-      "dk:flex dk:flex-col dk:gap-5 dk:rounded-2xl dk:border dk:border-(--border) dk:bg-(--card) dk:p-5 dk:text-(--foreground) dk:shadow-lg dk:shadow-black/20",
-    );
+    const card = el("section", `${CARD} dk:flex dk:flex-col dk:gap-5 dk:p-5`);
     const head = el("div", "dk:flex dk:items-center dk:justify-between dk:gap-3");
     const title = el("div", "dk:flex dk:items-center dk:gap-2");
     title.append(
-      el("span", "dk:size-2 dk:rounded-full dk:bg-teal-400 dk:shadow-[0_0_0_3px_rgba(45,212,191,0.2)]"),
+      el("span", "dk:size-1.5 dk:rounded-full dk:bg-(--s-ok)"),
       el("h2", "dk:text-sm dk:font-semibold dk:tracking-tight", "Servidor"),
     );
-    const uptime = el("span", "dk:font-mono dk:text-xs dk:text-(--muted-foreground)", "");
+    const uptime = el("span", "dk:text-xs dk:text-(--v-muted)", "");
     head.append(title, uptime);
-
-    const meters = {
-      cpu: buildMeter("CPU"),
-      mem: buildMeter("Memória"),
-      disk: buildMeter("Disco"),
-    };
-    const foot = el("p", "dk:font-mono dk:text-xs dk:text-(--foreground)0", "");
+    const meters = { cpu: buildMeter("CPU"), mem: buildMeter("Memória"), disk: buildMeter("Disco") };
+    const foot = el("p", "dk:border-t dk:border-(--v-border) dk:pt-4 dk:font-mono dk:text-xs dk:text-(--v-muted)", "");
     card.append(head, meters.cpu, meters.mem, meters.disk, foot);
-
     card.update = (s) => {
       if (!s) {
         foot.textContent = "Métricas indisponíveis";
@@ -323,164 +309,114 @@
       meters.mem.set((s.memory.used / s.memory.total) * 100, `${fmtGB(s.memory.used)} / ${fmtGB(s.memory.total)}`);
       meters.disk.set((s.disk.used / s.disk.total) * 100, `${fmtGB(s.disk.used)} / ${fmtGB(s.disk.total)}`);
       uptime.textContent = "ligado há " + fmtUptime(s.uptime);
-      foot.textContent = `${s.cpu.cores} núcleos · carga ${s.cpu.load.map((x) => x.toFixed(2)).join(" / ")}`;
+      foot.textContent = `${s.cpu.cores} núcleos · carga ${s.cpu.load.map((x) => x.toFixed(2)).join(" · ")}`;
     };
     return card;
   }
 
-  const MUTED_PAGE = "dk:text-[hsl(var(--muted-foreground))]";
+  /** Faixa única com os números principais, separados por linhas finas. */
+  function buildStats() {
+    const strip = el("section", `${CARD} dk:grid dk:grid-cols-2 dk:overflow-hidden dk:lg:grid-cols-4`);
+    const cells = {};
+    const cell = (key, label) => {
+      const c = el("div", "dk:flex dk:flex-col dk:gap-1 dk:border-(--v-border) dk:p-5 dk:not-first:border-l dk:max-lg:nth-3:border-l-0 dk:max-lg:nth-[n+3]:border-t");
+      const value = el("span", "dk:text-3xl dk:font-semibold dk:tracking-tight dk:tabular-nums", "");
+      const sub = el("span", "dk:text-xs dk:text-(--v-muted)", "");
+      c.append(el("span", "dk:text-[13px] dk:text-(--v-muted)", label), value, sub);
+      cells[key] = { value, sub, node: c };
+      strip.append(c);
+      return c;
+    };
+    cell("projects", "Projetos");
+    cell("services", "Serviços");
+    cell("deploys", "Deploys · 7 dias");
+    const state = cell("state", "Estado");
+    const bar = el("div", "dk:mt-1 dk:flex dk:h-1.5 dk:w-full dk:gap-0.5 dk:overflow-hidden dk:rounded-full");
+    cells.state.value.replaceWith(bar);
+    cells.state.bar = bar;
+    for (const k of ["projects", "services", "deploys"]) cells[k].value.append(skel("dk:inline-block dk:h-8 dk:w-12"));
+    strip.cells = cells;
+    return strip;
+  }
 
-  function buildAppsSection() {
-    const section = el("section", "dk:flex dk:min-w-0 dk:flex-col dk:gap-3");
+  const STATE_SEG = { done: "dk:bg-(--s-ok)", running: "dk:bg-(--s-warn)", error: "dk:bg-(--s-err)", idle: "dk:bg-(--v-border-strong)" };
 
-    const head = el("div", "dk:flex dk:flex-wrap dk:items-center dk:justify-between dk:gap-3");
-    const heading = el("div", "dk:flex dk:flex-col");
-    const title = el("h2", "dk:text-base dk:font-semibold dk:tracking-tight dk:text-[hsl(var(--foreground))]", "Seus apps");
-    const summary = el("p", `dk:text-xs ${MUTED_PAGE}`, "");
-    heading.append(title, summary);
-
-    const search = el(
-      "input",
-      "dk:h-9 dk:w-full dk:max-w-60 dk:rounded-lg dk:border dk:border-(--border) dk:bg-(--card) dk:px-3 dk:text-sm dk:text-(--foreground) dk:outline-none dk:placeholder:text-(--foreground)0 dk:focus:ring-2 dk:focus:ring-(--ring)/60",
-    );
-    search.type = "search";
-    search.placeholder = "Buscar app ou projeto…  ( / )";
-    search.setAttribute("aria-label", "Buscar app ou projeto");
-    head.append(heading, search);
-
-    const GRID = "dk:grid dk:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] dk:gap-3";
-    const grid = el("div", GRID);
-    for (let i = 0; i < 6; i++) {
-      grid.append(el("div", "dk:h-28 dk:animate-pulse dk:rounded-xl dk:bg-(--muted) dk:motion-reduce:animate-none"));
+  function buildProjectsCard() {
+    const card = el("section", `${CARD} dk:flex dk:min-w-0 dk:flex-col dk:overflow-hidden`);
+    const head = el("div", "dk:flex dk:items-center dk:justify-between dk:gap-3 dk:border-b dk:border-(--v-border) dk:px-5 dk:py-4");
+    const title = el("div", "dk:flex dk:flex-col");
+    const h2 = el("h2", "dk:text-sm dk:font-semibold dk:tracking-tight", "Projetos");
+    const sub = el("p", "dk:text-xs dk:text-(--v-muted)", "");
+    title.append(h2, sub);
+    const all = el("a", "dk:text-xs dk:text-(--v-muted) dk:no-underline dk:transition-colors dk:hover:text-(--v-fg)", "ver todos →");
+    all.href = "/dashboard/projects";
+    all.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      navigate("/dashboard/projects");
+    });
+    head.append(title, all);
+    const list = el("ul", "dk:flex dk:flex-col");
+    for (let i = 0; i < 4; i++) {
+      const li = el("li", "dk:flex dk:items-center dk:gap-3 dk:border-b dk:border-(--v-border) dk:px-5 dk:py-4 dk:last:border-b-0");
+      li.append(skel("dk:size-9"), (() => { const d = el("div", "dk:flex dk:flex-1 dk:flex-col dk:gap-2"); d.append(skel("dk:h-3.5 dk:w-32"), skel("dk:h-3 dk:w-48")); return d; })());
+      list.append(li);
     }
-    section.append(head, grid);
+    card.append(head, list);
 
-    let services = [];
+    let items = [];
     let urls = {};
-    let firstPaint = true;
-
-    const buildTile = (s, index) => {
-      const st = styleOf(s.status);
-      const tile = el(
-        "div",
-        "dk:group dk:flex dk:cursor-pointer dk:flex-col dk:gap-3 dk:rounded-xl dk:border dk:border-(--border) dk:bg-(--card) dk:p-4 dk:text-(--foreground) dk:shadow-md dk:shadow-black/10 dk:transition dk:duration-150 dk:hover:bg-(--muted) dk:motion-reduce:transition-none" +
-          (firstPaint ? " dk:animate-rise dk:motion-reduce:animate-none" : ""),
-      );
-      if (firstPaint) tile.style.animationDelay = Math.min(index, 14) * 35 + "ms";
-
-      const top = el("div", "dk:flex dk:items-center dk:gap-2.5");
-      top.append(el("span", `dk:size-2 dk:shrink-0 dk:rounded-full ${st.led}`));
-      const name = el("a", "dk:min-w-0 dk:flex-1 dk:truncate dk:text-sm dk:font-semibold dk:text-(--foreground) dk:no-underline", s.name);
-      name.href = s.href;
-      name.addEventListener("click", (e) => e.stopPropagation());
-      top.append(name);
-
-      if (urls[s.id]) {
-        const open = el(
-          "a",
-          "dk:flex dk:size-7 dk:shrink-0 dk:items-center dk:justify-center dk:rounded-full dk:bg-(--muted) dk:text-sm dk:text-(--foreground) dk:no-underline dk:transition dk:hover:bg-(--foreground) dk:hover:text-(--background) dk:group-hover:bg-zinc-700",
-          "↗",
-        );
-        open.href = urls[s.id];
-        open.target = "_blank";
-        open.rel = "noopener noreferrer";
-        open.title = `Abrir ${urls[s.id]}`;
-        open.setAttribute("aria-label", `Abrir ${s.name} em nova aba`);
-        open.dataset.open = "";
-        top.append(open);
-      }
-
-      const sub = el("div", "dk:flex dk:flex-col dk:gap-0.5");
-      sub.append(el("span", "dk:truncate dk:text-xs dk:text-(--muted-foreground)", `${s.project} · ${s.env}`));
-      sub.append(
-        el(
-          "span",
-          "dk:truncate dk:font-mono dk:text-[11px] dk:text-(--foreground)0",
-          urls[s.id] ? hostOf(urls[s.id]) : "sem domínio",
-        ),
-      );
-
-      const bot = el("div", "dk:mt-auto dk:flex dk:items-center dk:gap-2");
-      bot.append(
-        el(
-          "span",
-          `dk:rounded-full dk:px-2 dk:py-0.5 dk:text-[10px] dk:font-medium dk:uppercase dk:tracking-wider ${st.chip}`,
-          STATUS_LABEL[s.status] || s.status,
-        ),
-      );
-      if (s.kind === "compose") {
-        bot.append(el("span", "dk:text-[10px] dk:uppercase dk:tracking-wider dk:text-(--foreground)0", "compose"));
-      }
-
-      tile.append(top, sub, bot);
-      tile.addEventListener("click", (e) => {
-        if (e.target.closest("[data-open]")) return;
-        navigate(s.href);
+    const row = (p) => {
+      const h = healthOf(p);
+      const li = el("li", "dk:border-b dk:border-(--v-border) dk:last:border-b-0");
+      const a = el("a", "dk:group dk:flex dk:items-center dk:gap-3 dk:px-5 dk:py-3.5 dk:text-(--v-fg) dk:no-underline dk:transition-colors dk:hover:bg-(--v-hover)");
+      a.href = p.href || "/dashboard/projects";
+      a.addEventListener("click", (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+        e.preventDefault();
+        navigate(a.getAttribute("href"));
       });
-      return tile;
+      const text = el("div", "dk:flex dk:min-w-0 dk:flex-1 dk:flex-col dk:gap-0.5");
+      text.append(el("span", "dk:truncate dk:text-sm dk:font-medium", p.name));
+      let site = "";
+      for (const t of p.urlTargets) if (urls[t.id]) { site = urls[t.id]; break; }
+      text.append(el("span", "dk:truncate dk:font-mono dk:text-xs dk:text-(--v-muted)", site ? hostOf(site) : servicesLabel(p)));
+      const ticks = el("span", "dk:hidden dk:items-center dk:gap-[2px] dk:sm:flex");
+      for (const t of p.ticks.slice(0, 10)) ticks.append(tick(t, "dk:h-3.5 dk:w-[3px]"));
+      const meta = el("span", "dk:hidden dk:w-36 dk:text-right dk:text-xs dk:whitespace-nowrap dk:text-(--v-muted) dk:md:block", site ? servicesLabel(p) : ago(p.createdAt));
+      const colour = h.pill.split(" ").find((c) => c.includes("text-")) || "";
+      const pill = el("span", `dk:flex dk:items-center dk:gap-2 dk:text-[13px] dk:whitespace-nowrap dk:sm:w-[84px] ${colour}`);
+      pill.title = h.text;
+      pill.append(el("span", `dk:size-1.5 dk:shrink-0 dk:rounded-full ${h.dot}`), el("span", "dk:hidden dk:sm:inline", h.text));
+      a.append(avatar(p.name, "dk:size-9"), text, ticks, meta, pill, icon("open", "dk:size-3.5 dk:text-(--v-subtle) dk:transition-transform dk:group-hover:translate-x-0.5 dk:group-hover:text-(--v-fg)"));
+      li.append(a);
+      return li;
     };
-
-    const render = () => {
-      const q = search.value.trim().toLowerCase();
-      const shown = services.filter((s) =>
-        !q || `${s.name} ${s.project} ${s.env} ${urls[s.id] || ""}`.toLowerCase().includes(q),
-      );
-
-      const count = (st) => services.filter((s) => s.status === st).length;
-      const parts = [`${count("done")} no ar`];
-      if (count("running")) parts.push(`${count("running")} implantando`);
-      if (count("error")) parts.push(`${count("error")} com erro`);
-      if (count("idle")) parts.push(`${count("idle")} parados`);
-      title.textContent = `Seus apps (${shown.length}${q ? ` de ${services.length}` : ""})`;
-      summary.textContent = services.length ? parts.join(" · ") : "";
-
-      grid.replaceChildren();
-      if (!shown.length) {
-        grid.className = "";
-        grid.append(
-          el(
-            "div",
-            `dk:rounded-xl dk:bg-(--muted) dk:px-4 dk:py-10 dk:text-center dk:text-sm dk:text-(--muted-foreground)`,
-            q ? "Nada encontrado para essa busca." : "Nenhum app ainda. Crie o primeiro em Projetos.",
-          ),
-        );
-        return;
-      }
-      grid.className = GRID;
-      shown.forEach((s, i) => grid.append(buildTile(s, i)));
-      if (services.length) firstPaint = false;
-    };
-
-    search.addEventListener("input", render);
-    section.search = search;
-    section.update = (list, map) => {
-      services = list;
+    card.update = (projects, map) => {
+      items = projects;
       urls = map || urls;
-      render();
+      const shown = [...items]
+        .sort((a, b) => healthOf(a).rank - healthOf(b).rank || new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 6);
+      sub.textContent = items.length > shown.length ? `${shown.length} de ${items.length}` : plural(items.length, "projeto", "projetos");
+      list.replaceChildren(...(shown.length ? shown.map(row) : [el("li", "dk:px-5 dk:py-10 dk:text-center dk:text-sm dk:text-(--v-muted)", "Nenhum projeto ainda.")]));
     };
-    return section;
+    return card;
   }
 
   function buildAlert(errors) {
-    const box = el(
-      "div",
-      "dk:order-first dk:flex dk:flex-wrap dk:items-center dk:gap-2.5 dk:rounded-xl dk:bg-red-950 dk:px-4 dk:py-3 dk:text-sm dk:text-red-100",
-    );
+    const box = el("div", "dk:flex dk:flex-wrap dk:items-center dk:gap-2.5 dk:rounded-xl dk:border dk:border-(--s-err)/30 dk:bg-(--s-err)/8 dk:px-4 dk:py-3 dk:text-sm");
     box.dataset.dk = "alert";
     box.setAttribute("role", "alert");
-    box.append(el("span", "dk:size-2 dk:rounded-full dk:bg-(--destructive) dk:animate-pulse dk:motion-reduce:animate-none"));
+    box.append(el("span", "dk:size-2 dk:rounded-full dk:bg-(--s-err) dk:animate-pulse dk:motion-reduce:animate-none"));
     const n = errors.length;
-    box.append(el("strong", "dk:font-semibold", n === 1 ? "1 serviço com erro:" : `${n} serviços com erro:`));
+    box.append(el("strong", "dk:font-medium dk:text-(--s-err)", n === 1 ? "1 serviço com erro:" : `${n} serviços com erro:`));
     for (const s of errors.slice(0, 6)) {
-      const a = el(
-        "a",
-        "dk:rounded-full dk:bg-(--destructive)/20 dk:px-2.5 dk:py-0.5 dk:text-xs dk:text-red-50 dk:no-underline dk:transition dk:hover:bg-(--destructive)/35",
-        s.name,
-      );
+      const a = el("a", "dk:rounded-full dk:border dk:border-(--s-err)/30 dk:px-2.5 dk:py-0.5 dk:text-xs dk:text-(--v-fg) dk:no-underline dk:transition-colors dk:hover:bg-(--s-err)/15", s.name);
       a.href = s.href;
       box.append(a);
     }
-    if (n > 6) box.append(el("span", "dk:text-xs dk:text-(--destructive)", `+${n - 6}`));
+    if (n > 6) box.append(el("span", "dk:text-xs dk:text-(--s-err)", `+${n - 6}`));
     return box;
   }
 
@@ -489,42 +425,103 @@
   function mount(container) {
     container.__dkt = true;
 
-    const panels = el(
-      "div",
-      "dk:order-1 dk:grid dk:grid-cols-1 dk:items-start dk:gap-4 dk:lg:grid-cols-[340px_minmax(0,1fr)]",
-    );
-    panels.dataset.dk = "panels";
+    // Lê o que precisa dos blocos nativos e esconde os que são substituídos
+    let userName = "";
+        for (const child of Array.from(container.children)) {
+      if (child.dataset.dk) continue;
+      const h1 = child.querySelector(":scope h1");
+      if (h1) {
+        userName = h1.textContent.split(",").slice(1).join(",").trim();
+        child.classList.add("dk:hidden");
+      } else if (child.classList.contains("grid")) {
+        child.classList.add("dk:hidden");
+      }
+    }
+
+    const page = el("div", "dkv dk:order-1 dk:flex dk:w-full dk:flex-col dk:gap-5 dk:text-(--v-fg)");
+    page.dataset.dk = "home";
+
+    const top = el("div", "dk:flex dk:flex-wrap dk:items-end dk:justify-between dk:gap-3");
+    const hello = el("div", "dk:flex dk:flex-col dk:gap-1");
+    const h1 = el("h1", "dk:text-2xl dk:font-semibold dk:tracking-tight", userName ? `Bem-vindo de volta, ${userName}` : "Bem-vindo de volta");
+    const summary = el("p", "dk:text-sm dk:text-(--v-muted)", "");
+    hello.append(h1, summary);
+    const go = el("a", "dk:inline-flex dk:h-9 dk:items-center dk:gap-2 dk:rounded-lg dk:bg-(--v-btn-bg) dk:px-3.5 dk:text-sm dk:font-medium dk:text-(--v-btn-fg) dk:no-underline dk:transition-colors dk:hover:bg-(--v-btn-hover)", "Projetos");
+    go.href = "/dashboard/projects";
+    go.append(icon("open", "dk:size-3.5"));
+    go.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      e.preventDefault();
+      navigate("/dashboard/projects");
+    });
+    top.append(hello, go);
+
+    const stats = buildStats();
+    const grid = el("div", "dk:grid dk:grid-cols-1 dk:items-start dk:gap-5 dk:lg:grid-cols-[minmax(0,1fr)_320px]");
+    const projectsCard = buildProjectsCard();
     const server = buildServerCard();
-    const apps = buildAppsSection();
-    panels.append(server, apps);
-    container.append(panels);
+    grid.append(projectsCard, server);
+    page.append(top, stats, grid);
+    container.append(page);
 
     let alertBox = null;
     const alive = () => container.isConnected;
+    let uptimeText = "";
 
-    const onKey = (e) => {
-      if (!alive()) return document.removeEventListener("keydown", onKey);
-      const t = e.target;
-      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable);
-      if (e.key === "/" && !typing && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault();
-        apps.search.focus();
+    // O bloco nativo continua vivo (só escondido) e recebe o número depois; copia quando mudar
+    const setText = (node, t) => { if (node.textContent !== t) node.textContent = t; };
+    const paintDeploys = () => {
+      let dbox = null;
+      for (const card of container.querySelectorAll(":scope > .grid > div")) {
+        if (/deploys|implanta/i.test(card.textContent.slice(0, 30))) dbox = card.querySelector(".flex-col.gap-1");
       }
+      const c = stats.cells;
+      setText(c.deploys.value, (dbox && dbox.children[0] && dbox.children[0].textContent.trim()) || "—");
+      setText(c.deploys.sub, (dbox && dbox.children[1] && dbox.children[1].textContent.trim()) || "");
     };
-    document.addEventListener("keydown", onKey);
+    new MutationObserver(() => alive() && paintDeploys()).observe(container, { childList: true, subtree: true, characterData: true });
 
+    const paint = (list) => {
+      const c = stats.cells;
+      const sum = { done: 0, running: 0, error: 0, idle: 0 };
+      const kinds = { apps: 0, compose: 0, dbs: 0 };
+      let total = 0;
+      for (const p of list) {
+        kinds.apps += p.apps; kinds.compose += p.compose; kinds.dbs += p.dbs;
+        for (const k of Object.keys(sum)) sum[k] += p.count[k];
+        total += p.total;
+      }
+      c.projects.value.textContent = String(list.length);
+      c.projects.sub.textContent = plural(list.reduce((n, p) => n + ((p.raw.environments || []).length || 0), 0), "ambiente", "ambientes");
+      c.services.value.textContent = String(total);
+      c.services.sub.textContent = [kinds.apps && `${kinds.apps} apps`, kinds.compose && `${kinds.compose} compose`, kinds.dbs && `${kinds.dbs} bancos`].filter(Boolean).join(" · ") || "—";
+      paintDeploys();
+      const segs = Object.entries(sum).filter(([, n]) => n > 0).map(([k, n]) => {
+        const s = el("i", `dk:block dk:h-full ${STATE_SEG[k]}`);
+        s.style.flex = String(n);
+        return s;
+      });
+      c.state.bar.replaceChildren(...segs);
+      const bits = [["done", "no ar"], ["running", "implantando"], ["error", "com erro"], ["idle", "parados"]].filter(([k]) => sum[k]).map(([k, t]) => `${sum[k]} ${t}`);
+      c.state.sub.textContent = bits.join(" · ");
+      summary.textContent = `${sum.done} de ${total} ${total === 1 ? "serviço" : "serviços"} no ar${uptimeText ? " · " + uptimeText : ""}`;
+    };
+
+    let last = [];
     async function refreshApps() {
       if (!alive()) return;
       try {
         const [projects] = await trpc([{ path: "project.all" }]);
-        const services = flattenServices(projects);
-        apps.update(services);
-        resolveDomains(services).then((map) => alive() && apps.update(services, map));
+        last = (projects || []).map(deriveProject);
+        paint(last);
+        projectsCard.update(last);
+        const targets = last.flatMap((p) => p.urlTargets.slice(0, 2));
+        resolveDomains(targets).then((map) => alive() && projectsCard.update(last, map));
 
-        const errors = services.filter((s) => s.status === "error");
+        const errors = flattenServices(projects).filter((s) => s.status === "error");
         if (alertBox) alertBox.remove();
         alertBox = errors.length ? buildAlert(errors) : null;
-        if (alertBox) container.append(alertBox);
+        if (alertBox) top.after(alertBox);
       } catch {
         /* mantém o que já estava na tela */
       }
@@ -535,7 +532,10 @@
       if (!alive()) return;
       try {
         const res = await fetch("/__stats", { credentials: "same-origin", cache: "no-store" });
-        server.update(res.ok ? await res.json() : null);
+        const s = res.ok ? await res.json() : null;
+        server.update(s);
+        uptimeText = s ? "servidor ligado há " + fmtUptime(s.uptime) : "";
+        if (last.length) paint(last);
       } catch {
         server.update(null);
       }
@@ -548,9 +548,10 @@
 
   /* ----------------- estilo dos blocos nativos do Dokploy ------------- */
 
-  const NATIVE_STAT =
+  const NATIVE_STAT_OLD =
     "dk:border-transparent dk:border dk:border-(--border) dk:bg-(--card) dk:text-(--foreground) dk:shadow-md dk:shadow-black/10 dk:transition dk:duration-150 dk:hover:bg-(--muted) dk:motion-reduce:transition-none dk:[&_.text-muted-foreground]:text-(--muted-foreground) dk:[&_.text-foreground]:text-(--foreground) dk:[&_.text-3xl]:tabular-nums dk:[&_.text-3xl]:tracking-tight";
-  const NATIVE_BLOCK = "dk:border-transparent dk:shadow-md dk:shadow-black/10";
+  const NATIVE_STAT = NATIVE_STAT_OLD;
+  const NATIVE_BLOCK = "dk:border-(--border) dk:bg-(--card) dk:shadow-none";
   const AFTER = "dk:order-2";
 
   function styleNative(container) {
