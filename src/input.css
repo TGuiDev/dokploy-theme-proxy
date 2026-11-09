@@ -292,6 +292,23 @@ a[data-slot="context-menu-trigger"]:hover [data-slot="card"] { box-shadow: 0 0 0
 /* ---- Transição entre telas e troca de tema ---- */
 @keyframes prk-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .prk-enter { animation: prk-enter 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Troca de página: sidebar e topbar ficam parados; só o conteúdo anima */
+[data-slot="sidebar-inset"] > header,
+[data-slot="sidebar-inset"] > div > header {
+  position: sticky; top: 0; z-index: 30; background: var(--background); height: 4rem; flex: none;
+}
+/* páginas que põem o topbar dentro de um bloco com padding: ele ocupa a largura toda, igual às outras */
+[data-slot="sidebar-inset"] > div:has(> header) > header { margin-left: -1rem; margin-right: -1rem; width: auto; }
+@keyframes prk-page-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+[data-slot="sidebar-inset"].prk-wait > :not(header):not(:has(> header)),
+[data-slot="sidebar-inset"].prk-wait > div:has(> header) > :not(header) {
+  opacity: 0; transform: translateY(4px); transition: opacity .14s ease, transform .14s ease;
+}
+[data-slot="sidebar-inset"].prk-in > :not(header):not(:has(> header)),
+[data-slot="sidebar-inset"].prk-in > div:has(> header) > :not(header) {
+  animation: prk-page-in .45s cubic-bezier(.22, 1, .36, 1) backwards;
+}
 html.prk-switching *, html.prk-switching *::before, html.prk-switching *::after {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
 }
@@ -476,7 +493,7 @@ pre, [data-slot="code-editor"], .cm-editor { border-radius: .6rem; }
 
 @media (prefers-reduced-motion: reduce) {
   a[data-slot="context-menu-trigger"][href*="/services/"] [data-slot="card"] { transform: none !important; }
-  .prk-enter, .prk-login-form { animation: none !important; }
+  .prk-enter, .prk-login-form, .prk-in > * { animation: none !important; }
   [data-slot="card"], [data-sidebar="menu-button"] { transition: none !important; transform: none !important; }
 }
 

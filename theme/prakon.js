@@ -242,16 +242,46 @@
     for (const b of document.querySelectorAll(".prk-theme")) paintToggle(b);
   }).observe(html, { attributes: true, attributeFilter: ["class"] });
 
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const still = reduced;
+
   /* ---------------- transição entre telas ---------------- */
   let lastPath = location.pathname;
+  let waiting = false, minTimer = 0, quietTimer = 0, capTimer = 0;
+  const getMain = () => document.querySelector('[data-slot="sidebar-inset"]') || document.querySelector("main");
+  // 1) a rota mudou: o conteúdo atual some de leve (sidebar e topbar não mexem)
+  function startWait() {
+    const main = getMain();
+    if (!main || reduced) return;
+    waiting = true;
+    main.classList.remove("prk-in");
+    main.classList.add("prk-wait");
+    clearTimeout(minTimer); clearTimeout(capTimer);
+    minTimer = setTimeout(bump, 140);
+    capTimer = setTimeout(endWait, 1600);
+  }
+  // 2) enquanto a nova página monta, espera o DOM sossegar
+  function bump() {
+    if (!waiting) return;
+    clearTimeout(quietTimer);
+    quietTimer = setTimeout(endWait, 90);
+  }
+  // 3) conteúdo novo entra com fade + subida suave
+  function endWait() {
+    if (!waiting) return;
+    waiting = false;
+    clearTimeout(minTimer); clearTimeout(quietTimer); clearTimeout(capTimer);
+    const main = getMain();
+    if (!main) return;
+    main.classList.remove("prk-wait");
+    void main.offsetWidth;
+    main.classList.add("prk-in");
+    setTimeout(() => main.classList.remove("prk-in"), 700);
+  }
   function routeChanged() {
     if (location.pathname === lastPath) return;
     lastPath = location.pathname;
-    const main = document.querySelector('[data-slot="sidebar-inset"]') || document.querySelector("main");
-    if (!main) return;
-    main.classList.remove("prk-enter");
-    void main.offsetWidth; // reinicia a animação
-    main.classList.add("prk-enter");
+    startWait();
   }
 
   /* ---------------- laço principal ---------------- */
@@ -274,6 +304,7 @@
   };
 
   new MutationObserver((records) => {
+    if (waiting) bump();
     for (const r of records) {
       if (r.type === "characterData") queue(r.target);
       else for (const n of r.addedNodes) if (n.nodeType === 1 || n.nodeType === 3) queue(n);
@@ -285,14 +316,13 @@
     const orig = history[m];
     history[m] = function (...a) {
       const r = orig.apply(this, a);
-      requestAnimationFrame(routeChanged);
+      routeChanged();
       return r;
     };
   }
-  window.addEventListener("popstate", () => requestAnimationFrame(routeChanged));
+  window.addEventListener("popstate", routeChanged);
 
   /* ---------------- login: grade que acende perto do cursor ---------------- */
-  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let glow = null;
   function initGlow() {
     const box = document.querySelector(".container:has(#login-form)");
