@@ -20,8 +20,8 @@
 
   /* ---------------- textos ---------------- */
   const LOGIN = new Map([
-    ["Sign in", "Entrar"],
-    ["Enter your email and password to sign in", "Digite seu e-mail e senha para entrar"],
+    ["Sign in", "Entrar no Prakon"],
+    ["Enter your email and password to sign in", "Use seu e-mail e senha para continuar"],
     ["Email", "E-mail"],
     ["Password", "Senha"],
     ["Login", "Entrar"],
@@ -34,7 +34,7 @@
     ["john@example.com", "voce@exemplo.com"],
   ]);
 
-  const DICT = new Map(Object.entries({"Home": "Início", "Projects": "Projetos", "Monitoring": "Monitoramento", "Schedules": "Agendamentos", "Traefik File System": "Arquivos do Traefik", "Docker": "Docker", "Swarm": "Swarm", "Requests": "Requisições", "Settings": "Configurações", "Web Server": "Servidor web", "Profile": "Perfil", "Remote Servers": "Servidores remotos", "Users": "Usuários", "SSH Keys": "Chaves SSH", "Git": "Git", "Registry": "Registro", "S3 Destinations": "Destinos S3", "Destinations": "Destinos", "Certificates": "Certificados", "Cluster": "Cluster", "Notifications": "Notificações", "Appearance": "Aparência", "Billing": "Cobrança", "License": "Licença", "Log out": "Sair", "Logout": "Sair", "Documentation": "Documentação", "Support": "Suporte", "Sponsor": "Apoiar", "Dashboard": "Painel", "Extra": "Extra", "Main": "Principal", "Toggle Sidebar": "Alternar barra lateral", "Toggle theme": "Alternar tema", "Account": "Conta", "My Account": "Minha conta", "Security": "Segurança", "AI": "IA", "Tags": "Tags", "Server": "Servidor", "Servers": "Servidores", "Git Providers": "Provedores Git", "Backups": "Backups", "Volume Backups": "Backups de volume", "Network": "Rede", "Registries": "Registros", "Templates": "Modelos", "Template": "Modelo", "Webhooks": "Webhooks", "Save": "Salvar", "Cancel": "Cancelar", "Delete": "Excluir", "Edit": "Editar", "Create": "Criar", "Close": "Fechar", "Confirm": "Confirmar", "Search": "Buscar", "Search...": "Buscar…", "Deploy": "Implantar", "Redeploy": "Reimplantar", "Rebuild": "Reconstruir", "Reload": "Recarregar", "Start": "Iniciar", "Stop": "Parar", "Restart": "Reiniciar", "Update": "Atualizar", "Add": "Adicionar", "Remove": "Remover", "Copy": "Copiar", "Download": "Baixar", "Upload": "Enviar", "Back": "Voltar", "Next": "Próximo", "Previous": "Anterior", "Continue": "Continuar", "Refresh": "Atualizar", "Clear": "Limpar", "Apply": "Aplicar", "Test": "Testar", "Test Connection": "Testar conexão", "View": "Ver", "Open": "Abrir", "Actions": "Ações", "Action": "Ação", "Select": "Selecionar", "Select All": "Selecionar tudo", "Bulk Actions": "Ações em massa", "Show": "Mostrar", "Hide": "Ocultar", "Enable": "Ativar", "Disable": "Desativar", "Enabled": "Ativado", "Disabled": "Desativado", "Yes": "Sim", "No": "Não", "Done": "Concluído", "Loading...": "Carregando…", "Loading": "Carregando", "Saving...": "Salvando…", "Submit": "Enviar", "Reset": "Redefinir", "Rollback": "Reverter", "Cancel Deployment": "Cancelar implantação", "Clean Cache": "Limpar cache", "Refresh Token": "Gerar novo token", "Move": "Mover", "Duplicate": "Duplicar", "Clone": "Clonar", "Import": "Importar", "Export": "Exportar", "Run": "Executar", "Manual": "Manual", "Automatic": "Automático", "Create Service": "Novo serviço", "Create Project": "Novo projeto", "Project Environment": "Variáveis do ambiente", "Environment": "Ambiente", "Environments": "Ambientes", "Production environment": "Ambiente de produção", "Development environment": "Ambiente de desenvolvimento", "Staging environment": "Ambiente de homologação", "production": "produção", "development": "desenvolvimento", "staging": "homologação", "Application": "Aplicação", "Applications": "Aplicações", "Database": "Banco de dados", "Databases": "Bancos de dados", "Compose": "Compose", "Docker Compose": "Docker Compose", "Service": "Serviço", "Services": "Serviços", "General": "Geral", "Domains": "Domínios", "Domain": "Domínio", "Deployments": "Implantações", "Deployment": "Implantação", "Logs": "Logs", "Advanced": "Avançado", "Preview Deployments": "Prévias de implantação", "Environment Variables": "Variáveis de ambiente", "Variables": "Variáveis", "Volumes": "Volumes", "Ports": "Portas", "Port": "Porta", "Redirects": "Redirecionamentos", "Build Type": "Tipo de build", "Source": "Origem", "Provider": "Provedor", "Repository": "Repositório", "Branch": "Branch", "Name": "Nome", "Description": "Descrição", "App Name": "Nome do app", "Status": "Estado", "Type": "Tipo", "Created": "Criado", "Created At": "Criado em", "Recently deployed": "Implantados recentemente", "Select types...": "Todos os tipos", "All servers": "Todos os servidores", "Filter services...": "Filtrar serviços…", "Filter...": "Filtrar…", "Newest": "Mais novos", "Oldest": "Mais antigos", "Name (A-Z)": "Nome (A–Z)", "Name (Z-A)": "Nome (Z–A)", "Recently created": "Criados recentemente", "Running": "Rodando", "Error": "Erro", "Idle": "Parado", "Queued": "Na fila", "Cancelled": "Cancelado", "Success": "Sucesso", "Failed": "Falhou", "Pending": "Pendente", "No results found.": "Nenhum resultado.", "No results": "Nenhum resultado", "No data": "Sem dados", "No deployments found": "Nenhuma implantação encontrada", "No services": "Nenhum serviço", "Docker Image": "Imagem Docker", "Nixpacks": "Nixpacks", "Dockerfile": "Dockerfile", "Heroku Buildpacks": "Heroku Buildpacks", "Paketo Buildpacks": "Paketo Buildpacks", "Static": "Estático", "Railpack": "Railpack", "Terminal": "Terminal", "Backup": "Backup", "Restore": "Restaurar", "Credentials": "Credenciais", "External Credentials": "Credenciais externas", "Internal Credentials": "Credenciais internas", "Username": "Usuário", "User": "Usuário", "Host": "Host", "Command": "Comando", "Cron": "Cron", "Schedule": "Agendamento", "AI Assistant": "Assistente de IA", "Project": "Projeto", "Empty": "Vazio"}));
+  const DICT = new Map(Object.entries({"Overview": "Visão geral", "Sessions": "Sessões", "Update Available": "Atualização disponível", "Audit Logs": "Logs de auditoria", "Home": "Início", "Projects": "Projetos", "Monitoring": "Monitoramento", "Schedules": "Agendamentos", "Traefik File System": "Arquivos do Traefik", "Docker": "Docker", "Swarm": "Swarm", "Requests": "Requisições", "Settings": "Configurações", "Web Server": "Servidor web", "Profile": "Perfil", "Remote Servers": "Servidores remotos", "Users": "Usuários", "SSH Keys": "Chaves SSH", "Git": "Git", "Registry": "Registro", "S3 Destinations": "Destinos S3", "Destinations": "Destinos", "Certificates": "Certificados", "Cluster": "Cluster", "Notifications": "Notificações", "Appearance": "Aparência", "Billing": "Cobrança", "License": "Licença", "Log out": "Sair", "Logout": "Sair", "Documentation": "Documentação", "Support": "Suporte", "Sponsor": "Apoiar", "Dashboard": "Painel", "Extra": "Extra", "Main": "Principal", "Toggle Sidebar": "Alternar barra lateral", "Toggle theme": "Alternar tema", "Account": "Conta", "My Account": "Minha conta", "Security": "Segurança", "AI": "IA", "Tags": "Tags", "Server": "Servidor", "Servers": "Servidores", "Git Providers": "Provedores Git", "Backups": "Backups", "Volume Backups": "Backups de volume", "Network": "Rede", "Registries": "Registros", "Templates": "Modelos", "Template": "Modelo", "Webhooks": "Webhooks", "Save": "Salvar", "Cancel": "Cancelar", "Delete": "Excluir", "Edit": "Editar", "Create": "Criar", "Close": "Fechar", "Confirm": "Confirmar", "Search": "Buscar", "Search...": "Buscar…", "Deploy": "Implantar", "Redeploy": "Reimplantar", "Rebuild": "Reconstruir", "Reload": "Recarregar", "Start": "Iniciar", "Stop": "Parar", "Restart": "Reiniciar", "Update": "Atualizar", "Add": "Adicionar", "Remove": "Remover", "Copy": "Copiar", "Download": "Baixar", "Upload": "Enviar", "Back": "Voltar", "Next": "Próximo", "Previous": "Anterior", "Continue": "Continuar", "Refresh": "Atualizar", "Clear": "Limpar", "Apply": "Aplicar", "Test": "Testar", "Test Connection": "Testar conexão", "View": "Ver", "Open": "Abrir", "Actions": "Ações", "Action": "Ação", "Select": "Selecionar", "Select All": "Selecionar tudo", "Bulk Actions": "Ações em massa", "Show": "Mostrar", "Hide": "Ocultar", "Enable": "Ativar", "Disable": "Desativar", "Enabled": "Ativado", "Disabled": "Desativado", "Yes": "Sim", "No": "Não", "Done": "Concluído", "Loading...": "Carregando…", "Loading": "Carregando", "Saving...": "Salvando…", "Submit": "Enviar", "Reset": "Redefinir", "Rollback": "Reverter", "Cancel Deployment": "Cancelar implantação", "Clean Cache": "Limpar cache", "Refresh Token": "Gerar novo token", "Move": "Mover", "Duplicate": "Duplicar", "Clone": "Clonar", "Import": "Importar", "Export": "Exportar", "Run": "Executar", "Manual": "Manual", "Automatic": "Automático", "Create Service": "Novo serviço", "Create Project": "Novo projeto", "Project Environment": "Variáveis do ambiente", "Environment": "Ambiente", "Environments": "Ambientes", "Production environment": "Ambiente de produção", "Development environment": "Ambiente de desenvolvimento", "Staging environment": "Ambiente de homologação", "production": "produção", "development": "desenvolvimento", "staging": "homologação", "Application": "Aplicação", "Applications": "Aplicações", "Database": "Banco de dados", "Databases": "Bancos de dados", "Compose": "Compose", "Docker Compose": "Docker Compose", "Service": "Serviço", "Services": "Serviços", "General": "Geral", "Domains": "Domínios", "Domain": "Domínio", "Deployments": "Implantações", "Deployment": "Implantação", "Logs": "Logs", "Advanced": "Avançado", "Preview Deployments": "Prévias de implantação", "Environment Variables": "Variáveis de ambiente", "Variables": "Variáveis", "Volumes": "Volumes", "Ports": "Portas", "Port": "Porta", "Redirects": "Redirecionamentos", "Build Type": "Tipo de build", "Source": "Origem", "Provider": "Provedor", "Repository": "Repositório", "Branch": "Branch", "Name": "Nome", "Description": "Descrição", "App Name": "Nome do app", "Status": "Estado", "Type": "Tipo", "Created": "Criado", "Created At": "Criado em", "Recently deployed": "Implantados recentemente", "Select types...": "Todos os tipos", "All servers": "Todos os servidores", "Filter services...": "Filtrar serviços…", "Filter...": "Filtrar…", "Newest": "Mais novos", "Oldest": "Mais antigos", "Name (A-Z)": "Nome (A–Z)", "Name (Z-A)": "Nome (Z–A)", "Recently created": "Criados recentemente", "Running": "Rodando", "Error": "Erro", "Idle": "Parado", "Queued": "Na fila", "Cancelled": "Cancelado", "Success": "Sucesso", "Failed": "Falhou", "Pending": "Pendente", "No results found.": "Nenhum resultado.", "No results": "Nenhum resultado", "No data": "Sem dados", "No deployments found": "Nenhuma implantação encontrada", "No services": "Nenhum serviço", "Docker Image": "Imagem Docker", "Nixpacks": "Nixpacks", "Dockerfile": "Dockerfile", "Heroku Buildpacks": "Heroku Buildpacks", "Paketo Buildpacks": "Paketo Buildpacks", "Static": "Estático", "Railpack": "Railpack", "Terminal": "Terminal", "Backup": "Backup", "Restore": "Restaurar", "Credentials": "Credenciais", "External Credentials": "Credenciais externas", "Internal Credentials": "Credenciais internas", "Username": "Usuário", "User": "Usuário", "Host": "Host", "Command": "Comando", "Cron": "Cron", "Schedule": "Agendamento", "AI Assistant": "Assistente de IA", "Project": "Projeto", "Empty": "Vazio"}));
   const PHX = new Map([["Select a server","Selecione um servidor"],["Select a project","Selecione um projeto"],["Type here...","Digite aqui…"],["Search projects...","Buscar projetos…"],["Search logs...","Buscar nos logs…"]]);
   const ENV = new Map([
     ["Create Service", "Novo serviço"], ["Select All", "Selecionar tudo"], ["Bulk Actions", "Ações em massa"],
@@ -170,6 +170,13 @@
       if (hero) hero.classList.add("prk-hero");
       const form = root.querySelector("#login-form");
       if (form && form.parentElement) form.parentElement.classList.add("prk-login-form");
+      const pk = root.querySelector('#login-form ~ button[data-variant="outline"]');
+      if (pk && !pk.previousElementSibling?.classList.contains("prk-or")) {
+        const or = document.createElement("div");
+        or.className = "prk-or";
+        or.textContent = "ou";
+        pk.before(or);
+      }
     }
   }
 
@@ -235,16 +242,46 @@
     for (const b of document.querySelectorAll(".prk-theme")) paintToggle(b);
   }).observe(html, { attributes: true, attributeFilter: ["class"] });
 
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const still = reduced;
+
   /* ---------------- transição entre telas ---------------- */
   let lastPath = location.pathname;
+  let waiting = false, minTimer = 0, quietTimer = 0, capTimer = 0;
+  const getMain = () => document.querySelector('[data-slot="sidebar-inset"]') || document.querySelector("main");
+  // 1) a rota mudou: o conteúdo atual some de leve (sidebar e topbar não mexem)
+  function startWait() {
+    const main = getMain();
+    if (!main || reduced) return;
+    waiting = true;
+    main.classList.remove("prk-in");
+    main.classList.add("prk-wait");
+    clearTimeout(minTimer); clearTimeout(capTimer);
+    minTimer = setTimeout(bump, 140);
+    capTimer = setTimeout(endWait, 1600);
+  }
+  // 2) enquanto a nova página monta, espera o DOM sossegar
+  function bump() {
+    if (!waiting) return;
+    clearTimeout(quietTimer);
+    quietTimer = setTimeout(endWait, 90);
+  }
+  // 3) conteúdo novo entra com fade + subida suave
+  function endWait() {
+    if (!waiting) return;
+    waiting = false;
+    clearTimeout(minTimer); clearTimeout(quietTimer); clearTimeout(capTimer);
+    const main = getMain();
+    if (!main) return;
+    main.classList.remove("prk-wait");
+    void main.offsetWidth;
+    main.classList.add("prk-in");
+    setTimeout(() => main.classList.remove("prk-in"), 700);
+  }
   function routeChanged() {
     if (location.pathname === lastPath) return;
     lastPath = location.pathname;
-    const main = document.querySelector('[data-slot="sidebar-inset"]') || document.querySelector("main");
-    if (!main) return;
-    main.classList.remove("prk-enter");
-    void main.offsetWidth; // reinicia a animação
-    main.classList.add("prk-enter");
+    startWait();
   }
 
   /* ---------------- laço principal ---------------- */
@@ -267,6 +304,7 @@
   };
 
   new MutationObserver((records) => {
+    if (waiting) bump();
     for (const r of records) {
       if (r.type === "characterData") queue(r.target);
       else for (const n of r.addedNodes) if (n.nodeType === 1 || n.nodeType === 3) queue(n);
@@ -278,11 +316,45 @@
     const orig = history[m];
     history[m] = function (...a) {
       const r = orig.apply(this, a);
-      requestAnimationFrame(routeChanged);
+      routeChanged();
       return r;
     };
   }
-  window.addEventListener("popstate", () => requestAnimationFrame(routeChanged));
+  window.addEventListener("popstate", routeChanged);
+
+  /* ---------------- login: grade que acende perto do cursor ---------------- */
+  let glow = null;
+  function initGlow() {
+    const box = document.querySelector(".container:has(#login-form)");
+    if (!box || box.__prkGlow || still) return;
+    box.__prkGlow = true;
+    let tx = innerWidth / 2, ty = innerHeight * 0.4, x = tx, y = ty, run = false;
+    const paint = () => {
+      x += (tx - x) * 0.14;
+      y += (ty - y) * 0.14;
+      box.style.setProperty("--mx", x.toFixed(1) + "px");
+      box.style.setProperty("--my", y.toFixed(1) + "px");
+      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.5) requestAnimationFrame(paint);
+      else run = false;
+    };
+    const go = () => { if (!run) { run = true; requestAnimationFrame(paint); } };
+    window.addEventListener("pointermove", (e) => { tx = e.clientX; ty = e.clientY; box.classList.add("prk-glow-on"); go(); }, { passive: true });
+    document.addEventListener("pointerleave", () => box.classList.remove("prk-glow-on"));
+    box.style.setProperty("--mx", x + "px");
+    box.style.setProperty("--my", y + "px");
+    glow = box;
+  }
+  setInterval(initGlow, 600);
+  initGlow();
+
+  /* ---------------- sidebar: brilho que segue o cursor nos itens ---------------- */
+  document.addEventListener("pointermove", (e) => {
+    const el = e.target.closest && e.target.closest('[data-sidebar="menu-button"]');
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--sx", (e.clientX - r.left).toFixed(0) + "px");
+    el.style.setProperty("--sy", (e.clientY - r.top).toFixed(0) + "px");
+  }, { passive: true });
 
   queue(document.body);
 })();
