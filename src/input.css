@@ -293,6 +293,29 @@ a[data-slot="context-menu-trigger"]:hover [data-slot="card"] { box-shadow: 0 0 0
 @keyframes prk-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .prk-enter { animation: prk-enter 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 
+/* Loading da troca de página */
+#nprogress { display: none !important; }
+.prk-loader { display: none; position: fixed; z-index: 20; top: 4rem; bottom: 0; pointer-events: none; }
+[data-slot="sidebar-inset"].prk-wait > .prk-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9rem; animation: prk-loader-in .25s ease .18s both; }
+@keyframes prk-loader-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.prk-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; overflow: hidden; background: color-mix(in oklab, var(--foreground) 8%, transparent); }
+.prk-bar::before {
+  content: ""; position: absolute; inset: 0; width: 38%;
+  background: linear-gradient(90deg, transparent, var(--foreground), transparent);
+  animation: prk-slide 1.1s cubic-bezier(.4, 0, .2, 1) infinite;
+}
+@keyframes prk-slide { from { transform: translateX(-100%); } to { transform: translateX(270%); } }
+.prk-load-mark { position: relative; display: grid; place-items: center; width: 3rem; height: 3rem; }
+.prk-load-mark svg { width: 1.6rem; height: 1.6rem; border-radius: .45rem; animation: prk-breathe 1.6s ease-in-out infinite; }
+.prk-ring {
+  position: absolute; inset: 0; border-radius: 999px; border: 2px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  border-top-color: var(--foreground); animation: prk-rotate .85s linear infinite;
+}
+@keyframes prk-rotate { to { transform: rotate(360deg); } }
+@keyframes prk-breathe { 0%,100% { transform: scale(.92); opacity: .75; } 50% { transform: scale(1); opacity: 1; } }
+.prk-load-text { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-foreground); }
+@media (prefers-reduced-motion: reduce) { .prk-bar::before, .prk-ring, .prk-load-mark svg { animation: none; } }
+
 /* Troca de página: sidebar e topbar ficam parados; só o conteúdo anima */
 [data-slot="sidebar-inset"] > header,
 [data-slot="sidebar-inset"] > div > header {

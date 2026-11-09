@@ -250,19 +250,44 @@
   let waiting = false, minTimer = 0, quietTimer = 0, capTimer = 0;
   const getMain = () => document.querySelector('[data-slot="sidebar-inset"]') || document.querySelector("main");
   // 1) a rota mudou: o conteúdo atual some de leve (sidebar e topbar não mexem)
-  function startWait() {
+  // Loading: barra fina sob o topbar + logo com anel girando (só aparece se demorar)
+  function ensureLoader(main) {
+    if (main.querySelector(":scope > .prk-loader")) return;
+    const box = document.createElement("div");
+    box.className = "prk-loader";
+    box.setAttribute("aria-hidden", "true");
+    box.innerHTML = `<i class="prk-bar"></i><div class="prk-load-mark"><span class="prk-ring"></span><svg viewBox="0 0 32 32">${MARK}</svg></div><span class="prk-load-text">Carregando</span>`;
+    main.append(box);
+  }
+  let awaitingRoute = false;
+  function startWait(fromClick) {
+    awaitingRoute = fromClick === true;
     const main = getMain();
     if (!main || reduced) return;
+    ensureLoader(main);
+    const lb = main.querySelector(":scope > .prk-loader");
+    const r = main.getBoundingClientRect();
+    lb.style.left = r.left + "px";
+    lb.style.width = r.width + "px";
     waiting = true;
     main.classList.remove("prk-in");
     main.classList.add("prk-wait");
-    clearTimeout(minTimer); clearTimeout(capTimer);
+    clearTimeout(minTimer); clearTimeout(capTimer); clearTimeout(quietTimer);
     minTimer = setTimeout(bump, 140);
-    capTimer = setTimeout(endWait, 1600);
+    capTimer = setTimeout(endWait, 8000); // rede lenta: segura o loading até a rota chegar
   }
+  // O Next só troca a URL depois de baixar os dados da próxima tela: o loading começa no clique
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (!a || e.button || e.metaKey || e.ctrlKey || e.shiftKey || a.target === "_blank") return;
+    let u;
+    try { u = new URL(a.href, location.href); } catch { return; }
+    if (u.origin !== location.origin || u.pathname === location.pathname || !u.pathname.startsWith("/dashboard")) return;
+    startWait(true);
+  }, true);
   // 2) enquanto a nova página monta, espera o DOM sossegar
   function bump() {
-    if (!waiting) return;
+    if (!waiting || awaitingRoute) return;
     clearTimeout(quietTimer);
     quietTimer = setTimeout(endWait, 90);
   }
